@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("physics")]
     public float rayCastLength;
     public float rotationSpeed;
     private float tempRotationSpeed;
@@ -12,7 +13,6 @@ public class PlayerController : MonoBehaviour
     public float jumpForce;
     private Rigidbody rb;
     public Transform currentPlanet;
-    public Transform playerVisual;
 
     private RaycastHit[] hits;
     private Vector3 planetDir;
@@ -20,19 +20,19 @@ public class PlayerController : MonoBehaviour
     private Vector3 input;
 
     public bool isTouchingPlanet = false;
+
+    [Header("Player Setup")]
+    public Transform playerVisual;
     private Transform MainCameraTransform;
     public Transform CameraArmTransform;
     private Animator anim;
+    public Transform GrabPoint;
 
     PlayerControls playerControls;
 
     private bool canJump = true;
     private bool slowDown = false;
     private bool inSpace = false;
-
-    private Quaternion targetSpaceTilt = Quaternion.identity;
-    [SerializeField] private float spaceTiltAngle = 20f;
-    [SerializeField] private float spaceTiltSpeed = 5f;
 
     private void Awake()
     {
