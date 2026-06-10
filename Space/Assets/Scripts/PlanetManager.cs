@@ -33,10 +33,18 @@ public class PlanetManager : MonoBehaviour
             }
         }
 
-        obj.GetComponent<Rigidbody>().AddForce(normalDir.normalized * -10f, ForceMode.Acceleration);
-        hits = new RaycastHit[0];
-        Quaternion targetRot = Quaternion.FromToRotation(obj.transform.up, normalDir) * obj.transform.rotation;
-        obj.transform.rotation = Quaternion.Lerp(obj.transform.rotation, targetRot, 15f * Time.fixedDeltaTime);
+        Rigidbody rb = obj.GetComponent<Rigidbody>();  
+        if (rb != null)
+        {
+            Vector3 velocity = rb.linearVelocity + normalDir.normalized * -10f * Time.fixedDeltaTime;
 
+            rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime);
+            //obj.GetComponent<Rigidbody>().AddForce(normalDir.normalized * -10f, ForceMode.Acceleration);
+            
+            Quaternion targetRot = Quaternion.FromToRotation(obj.transform.up, normalDir) * obj.transform.rotation;
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRot, 15f * Time.fixedDeltaTime));
+            //obj.transform.rotation = Quaternion.Lerp(obj.transform.rotation, targetRot, 15f * Time.fixedDeltaTime);
+        }
+        hits = new RaycastHit[0];
     }
 }

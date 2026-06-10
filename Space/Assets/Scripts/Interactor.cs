@@ -14,6 +14,8 @@ public interface IPickupable
     Transform prevParent { get; }
     Transform ogPosition { get; }
     public void PickUp();
+
+    public void Drop();
 }
 public class Interactor : MonoBehaviour
 {
@@ -32,27 +34,46 @@ public class Interactor : MonoBehaviour
     {
         if (Keyboard.current.eKey.wasPressedThisFrame)
         {
+            HandleInteract();
+        }
+        if (Keyboard.current.gKey.wasPressedThisFrame)
+        {
+            HandleGrab();
+        }
+    }
+
+    private void HandleGrab()
+    {
+        if (grabbedObj != null && grabbing)
+        {
+            grabbedObj.GetComponent<IPickupable>().Drop();
+            grabbedObj = null;
+            grabbing = false;
+        }
+        else
+        {
             GameObject target = GetInteractable();
-            if (target != null && target.TryGetComponent(out IInteractable interactObj))
+            if (target != null && target.TryGetComponent(out IPickupable pickupObj))
             {
-                if (interactObj.RequireHoldingToInteract)
-                {
-                    if (target.TryGetComponent(out IPickupable pickupObj))
-                    {
-                        if (pickupObj.isHeld)
-                        {
-                            interactObj.Interact();
-                        }
-                        else
-                        {
-                            pickupObj.PickUp();
-                        }
-                    }
-                }
-                else
-                {
-                    interactObj.Interact();
-                }
+                pickupObj.PickUp();
+                grabbedObj = target;
+                grabbing = true;
+            }
+        }     
+    }
+
+    private void HandleInteract()
+    {
+        GameObject target = GetInteractable();
+        if (target != null && target.TryGetComponent(out IInteractable interactObj))
+        {
+            if (interactObj.RequireHoldingToInteract && target == grabbedObj)
+            {
+                interactObj.Interact();
+            }
+            else if (!interactObj.RequireHoldingToInteract)
+            {
+                interactObj.Interact();
             }
         }
     }

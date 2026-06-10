@@ -17,7 +17,7 @@ public class FrierenStaff : MonoBehaviour, IInteractable, IPickupable
     private PlayerController playerController;
     private PlanetManager planetManager;
     private Rigidbody rb;
-    public bool held = false;
+    public bool touchingGround = false;
     public bool isHeld { get; private set; }
     public bool RequireHoldingToInteract { get; private set; }
 
@@ -62,17 +62,13 @@ public class FrierenStaff : MonoBehaviour, IInteractable, IPickupable
 
     public void PickUp()
     {
-        if (isHeld)
-        {
-            Drop();
-            return;
-        }
+        if (isHeld) return;
         Debug.Log("picking up");
         isHeld = true;
-        held = true;
         if (playerController.GrabPoint != null)
         {
-            transform.SetParent(playerController.GrabPoint, false);
+            prevParent = transform.parent;
+            transform.SetParent(playerController.GrabPoint, true);
             transform.localPosition = Vector3.zero;
             transform.localRotation = Quaternion.identity;
         }
@@ -81,23 +77,35 @@ public class FrierenStaff : MonoBehaviour, IInteractable, IPickupable
 
     public void Drop()
     {
+        if (!isHeld) return;
         isHeld = false;
         if (prevParent != null)
         {
             Debug.Log("dropping");
-            transform.SetParent(prevParent, false);
+            transform.SetParent(prevParent, true);
+            prevParent = null;
         }
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
-        if (!isHeld && playerController != null)
+        if (!isHeld && planetManager != null && !touchingGround)
         {
             planetManager.HandleObjGravity(transform);
         }
-        else
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.TryGetComponent(out Planet p))
         {
-            rb.isKinematic = true;
+            touchingGround = true;
         }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.TryGetComponent(out Planet p))
+            touchingGround = false;
     }
 }
